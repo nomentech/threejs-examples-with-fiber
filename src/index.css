@@ -11,10 +11,13 @@ body,
   height: 100%;
   padding: 10px;
   line-height: 30px;
-  cursor: pointer;
   border-right-width: 1px;
   border-right-color: #e8e8e8;
   border-right-style: solid;
+}
+
+.list {
+  cursor: pointer;
 }
 
 .viewer {

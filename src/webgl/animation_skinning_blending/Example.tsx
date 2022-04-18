@@ -309,8 +309,8 @@ const Example = () => {
       <fog attach="fog" color={0xa0a0a0} near={10} far={50} />
       <hemisphereLight color={0xffffff} groundColor={0x444444} position={[0, 20, 0]} />
       <directionalLight color={0xffffff} position={[-3, 10, -10]} castShadow
-        shadowCameraLeft={-2} shadowCameraRight={2} shadowCameraTop={2} shadowCameraBottom={-2}
-        shadowCameraNear={0.1} shadowCameraFar={40}
+        shadow-camera-left={-2} shadow-camera-right={2} shadow-camera-top={2} shadow-camera-bottom={-2}
+        shadow-camera-near={0.1} shadow-camera-far={40}
       />
       <Ground />
       <Model />
