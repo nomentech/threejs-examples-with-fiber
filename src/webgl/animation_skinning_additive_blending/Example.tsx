@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { AnimationAction, AnimationMixer, AnimationUtils, Group, SkeletonHelper } from "three"
 import { Canvas, useFrame } from "@react-three/fiber"
-import { OrbitControls, Stats, useGLTF } from "@react-three/drei"
+import { OrbitControls, useGLTF } from "@react-three/drei"
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min"
 
 useGLTF.preload("/models/Xbot.glb")
@@ -249,7 +249,6 @@ const Example = () => {
       />
       <Ground />
       <Model />
-      <Stats className="stats" />
       <OrbitControls enablePan={false} enableZoom={false} target={[0, 1, 0]} />
     </Canvas>
   )

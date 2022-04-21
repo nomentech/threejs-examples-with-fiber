@@ -1,6 +1,6 @@
 import { Suspense, useEffect } from "react"
 import { Canvas, useThree } from "@react-three/fiber"
-import { OrbitControls, Stats, useAnimations, useGLTF } from "@react-three/drei"
+import { OrbitControls, useAnimations, useGLTF } from "@react-three/drei"
 import { Color, PMREMGenerator } from "three"
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment"
 
@@ -38,7 +38,6 @@ const Example = () => {
         <Model />
       </Suspense>
       <OrbitControls target={[0, 0.5, 0]}/>
-      <Stats className="stats" />
     </Canvas>
   )
 }

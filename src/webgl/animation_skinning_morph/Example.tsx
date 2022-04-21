@@ -1,10 +1,10 @@
 import { AnimationClip, AnimationMixer, Group, LoopOnce } from "three"
 import { Canvas, useFrame } from "@react-three/fiber"
-import { Stats, useGLTF } from "@react-three/drei"
+import { useGLTF } from "@react-three/drei"
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min"
 import { useEffect } from "react"
 
-useGLTF.preload("/model/RobotExpressive.glb")
+useGLTF.preload("/models/RobotExpressive.glb")
 
 let gui, mixer: AnimationMixer, actions: any, activeAction: any, previousAction: any
 let model: Group, face: any
@@ -101,13 +101,13 @@ const Model = () => {
   const { scene, animations } = useGLTF("/models/RobotExpressive.glb")
   model = scene
 
+  useFrame((_, delta) => {
+    mixer.update(delta)
+  })
+
   useEffect(() => {
     createControl(model, animations)
   }, [])
-
-  useFrame((_, delta) => {
-      mixer.update(delta)
-  })
 
   return (
     <primitive object={scene} />
@@ -142,7 +142,6 @@ const Example = () => {
       <directionalLight color={0xffffff} position={[0, 20, 10]} />
       <Ground />
       <Model />
-      <Stats className="stats" />
     </Canvas>
  )
 }

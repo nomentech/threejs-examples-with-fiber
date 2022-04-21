@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { AnimationAction, AnimationMixer, Group, SkeletonHelper } from "three"
 import { Canvas, useFrame } from "@react-three/fiber"
-import { Stats, useGLTF } from "@react-three/drei"
+import { useGLTF } from "@react-three/drei"
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min"
 
 let model: Group, skeleton: SkeletonHelper, mixer: AnimationMixer
@@ -314,7 +314,6 @@ const Example = () => {
       />
       <Ground />
       <Model />
-      <Stats className="stats" />
     </Canvas>
   )
 }

@@ -1,33 +1,13 @@
-html,
-body,
-#root {
-  margin: 0;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-.panel {
-  position: fixed;
-  left: 0;
-  width: 20%;
-  height: 100%;
-  padding: 10px;
-  line-height: 30px;
-  border-right-width: 1px;
-  border-right-color: #e8e8e8;
-  border-right-style: solid;
-}
-
-.list {
-  cursor: pointer;
-}
-
-.viewer {
-  position: absolute;
-  left: 20%;
-  right: 0;
-  height: 100%;
-}
-
-.stats {
-  position: absolute !important;
-  left: 20% !important;
+@media (max-width: 640px) {
+  .lil-gui {
+    top: auto !important;
+    right: auto !important;
+    max-height: 50% !important;
+    left: 0;
+    bottom: 0;
+  }
 }
