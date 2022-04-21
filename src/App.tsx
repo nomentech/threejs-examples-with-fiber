@@ -4,7 +4,8 @@ const webgl = [
   "animation_keyframes",
   "animation_skinning_blending",
   "animation_skinning_additive_blending",
-  "animation_skinning_morph"
+  "animation_skinning_morph",
+  "animation_multiple"
 ]
 let current = webgl[webgl.length-1]
 
@@ -26,7 +27,7 @@ const App = () => {
       setExample(component)
 
       current = item
-      setShowMenu(false)
+      if (window.innerWidth < 640) setShowMenu(false)
     }
   }
 
