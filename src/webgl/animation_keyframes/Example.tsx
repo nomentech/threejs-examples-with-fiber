@@ -4,7 +4,8 @@ import { OrbitControls, useAnimations, useGLTF } from "@react-three/drei"
 import { Color, PMREMGenerator } from "three"
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment"
 
-useGLTF.preload("/models/LittlestTokyo.glb")
+const modelPath = `${process.env.PUBLIC_URL}/models/LittlestTokyo.glb`
+useGLTF.preload(modelPath)
 
 const Env = () => {
   const {gl, scene } = useThree()
@@ -15,7 +16,7 @@ const Env = () => {
 }
 
 const Model = () => {
-  const { scene, animations } = useGLTF("/models/LittlestTokyo.glb") as any
+  const { scene, animations } = useGLTF(modelPath) as any
   const { actions } = useAnimations(animations, scene)
 
   useEffect(() => {

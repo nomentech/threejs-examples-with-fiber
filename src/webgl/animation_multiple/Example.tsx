@@ -4,7 +4,7 @@ import { useGLTF } from "@react-three/drei"
 import { AnimationMixer } from "three"
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils"
 
-const modelPath = "/models/Soldier.glb"
+const modelPath = `${process.env.PUBLIC_URL}/models/Soldier.glb`
 useGLTF.preload(modelPath)
 
 const mixers: AnimationMixer[] = []

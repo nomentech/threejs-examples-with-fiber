@@ -4,7 +4,8 @@ import { Canvas, useFrame } from "@react-three/fiber"
 import { OrbitControls, useGLTF } from "@react-three/drei"
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min"
 
-useGLTF.preload("/models/Xbot.glb")
+const modelPath = `${process.env.PUBLIC_URL}/models/Xbot.glb`
+useGLTF.preload(modelPath)
 
 let model: Group, skeleton: SkeletonHelper, mixer: AnimationMixer
 const crossFadeControls: any[] = []
@@ -102,7 +103,7 @@ const executeCrossFade = (startAction: AnimationAction, endAction: AnimationActi
 }
 
 const Model = () => {
-  const { scene, animations } = useGLTF("/models/Xbot.glb")
+  const { scene, animations } = useGLTF(modelPath)
 
   model = scene
   mixer = new AnimationMixer(model)

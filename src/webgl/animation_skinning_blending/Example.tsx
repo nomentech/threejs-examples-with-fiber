@@ -14,7 +14,8 @@ let actions: Array<AnimationAction>
 let singleStepMode = false;
 let sizeOfNextStep = 0;
 
-useGLTF.preload("/models/Soldier.glb")
+const modelPath = `${process.env.PUBLIC_URL}/models/Soldier.glb`
+useGLTF.preload(modelPath)
 
 // This function is needed, since animationAction.crossFadeTo() disables its start action and sets
 // the start action's timeScale to ((start animation's duration) / (end animation's duration))
@@ -192,7 +193,7 @@ const settings = {
 }
 
 const Model = () => {
-  const { scene, animations } = useGLTF("/models/Soldier.glb")
+  const { scene, animations } = useGLTF(modelPath)
   // const clips = useAnimations(animations, scene)
 
   model = scene

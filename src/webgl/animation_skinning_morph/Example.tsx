@@ -4,7 +4,8 @@ import { useGLTF } from "@react-three/drei"
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min"
 import { useEffect } from "react"
 
-useGLTF.preload("/models/RobotExpressive.glb")
+const modelPath = `${process.env.PUBLIC_URL}/models/RobotExpressive.glb`
+useGLTF.preload(modelPath)
 
 let gui, mixer: AnimationMixer, actions: any, activeAction: any, previousAction: any
 let model: Group, face: any
@@ -98,11 +99,11 @@ const createControl = (model: Group, animations: AnimationClip[]) => {
 }
 
 const Model = () => {
-  const { scene, animations } = useGLTF("/models/RobotExpressive.glb")
+  const { scene, animations } = useGLTF(modelPath)
   model = scene
 
   useFrame((_, delta) => {
-    mixer.update(delta)
+    if (mixer) mixer.update(delta)
   })
 
   useEffect(() => {
