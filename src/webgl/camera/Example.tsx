@@ -3,18 +3,34 @@ import { CameraHelper, MathUtils } from "three"
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { OrthographicCamera, PerspectiveCamera, useHelper } from "@react-three/drei"
 
-const SCREEN_WIDTH = window.innerWidth
-const SCREEN_HEIGHT = window.innerHeight
+const SCREEN_WIDTH = window.innerWidth > 640 ? window.innerWidth - 300 : window.innerWidth
+const SCREEN_HEIGHT = window.innerWidth > 640 ? window.innerHeight : window.innerHeight - 48
 const aspect = SCREEN_WIDTH / SCREEN_HEIGHT
 const frustumSize = 600
 
-let mesh: any, renderer: any
+let mesh: any, renderer: any, camera: any
 let cameraPerspective: any, cameraOrtho: any
 let cameraPerspectiveHelper: any, cameraOrthoHelper: any
 let activeCamera: any, activeHelper: any
 
+const onKeydown = (event: any) => {
+  switch (event.key) {
+    case "o":
+    case "O":
+      activeCamera = cameraOrtho
+      activeHelper = cameraOrthoHelper
+      break
+
+    case "p":
+    case "P":
+      activeCamera = cameraPerspective
+      activeHelper = cameraPerspectiveHelper
+      break
+  }
+}
+
 const CameraHelpers = () => {
-  const { gl, scene, camera } = useThree()
+  const { gl, scene } = useThree()
   renderer = gl
   renderer.autoClear = false
 
@@ -23,25 +39,12 @@ const CameraHelpers = () => {
   cameraPerspectiveHelper = useHelper(cameraPerspective, CameraHelper)
   cameraOrthoHelper = useHelper(cameraOrtho, CameraHelper)
 
-  window.addEventListener("keydown", (event) => {
-    switch (event.key) {
-      case "o":
-      case "O":
-        activeCamera = cameraOrtho
-        activeHelper = cameraOrthoHelper
-        break
-
-      case "p":
-      case "P":
-        activeCamera = cameraPerspective
-        activeHelper = cameraPerspectiveHelper
-        break
-    }
-  })
-
   useEffect(() => {
     activeCamera = cameraPerspective
     activeHelper = cameraPerspectiveHelper
+
+    window.addEventListener("keydown", onKeydown)
+    return () => window.removeEventListener("keydown", onKeydown)
   }, [])
 
   useFrame(() => {
@@ -88,7 +91,7 @@ const CameraHelpers = () => {
 
       activeHelper.visible = true
       renderer.setViewport(SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT)
-      renderer.render(scene, camera)
+      renderer.render(scene, camera.current)
     }
   })
 
@@ -110,6 +113,16 @@ const CameraHelpers = () => {
         <meshBasicMaterial color={0x0000ff} wireframe={true} />
       </mesh>
     </group>
+  )
+}
+
+const Camera = () => {
+  camera = useRef()
+
+  return (
+    <PerspectiveCamera makeDefault ref={camera}
+      position={[0, 0, 2500]} fov={50} aspect={0.5*aspect} near={1} far={10000}
+    />
   )
 }
 
@@ -147,8 +160,9 @@ const Mesh = () => {
 
 const Example = () => {
   return (
-    <Canvas camera={{position: [0, 0, 2500], fov: 50, aspect: 0.5*aspect, near: 1, far: 10000}} >
+    <Canvas camera={{manual: true}} >
       <color attach="background" args={["black"]} />
+      <Camera />
       <CameraHelpers />
       <Mesh />
       <Particles />

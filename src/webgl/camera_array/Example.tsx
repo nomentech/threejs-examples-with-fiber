@@ -89,8 +89,13 @@ const Cameras = () => {
 }
 
 const Example = () => {
-  // default camera is set to arrayCamera, do resize manually
-  window.addEventListener("resize", onWindowResize)
+  useEffect(() => {
+    // default camera is set to arrayCamera, do resize manually
+    window.addEventListener("resize", onWindowResize)
+    return () => {
+      window.removeEventListener("resize", onWindowResize)
+    }
+  }, [])
 
   return (
     <Canvas shadows onCreated={({ gl }) => (renderer = gl)}>
