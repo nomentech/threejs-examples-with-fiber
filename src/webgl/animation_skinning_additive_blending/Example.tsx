@@ -8,7 +8,7 @@ useGLTF.preload("/models/Xbot.glb")
 
 let model: Group, skeleton: SkeletonHelper, mixer: AnimationMixer
 const crossFadeControls: any[] = []
-let currentBaseAction = 'idle'
+let currentBaseAction = "idle"
 const allActions: any = []
 const baseActions = {
   idle: { weight: 1 },
@@ -175,7 +175,7 @@ const Controls = () => {
     const baseNames = ["None", ...Object.keys(baseActions)]
 
     for (let i = 0, l = baseNames.length; i !== l; ++i) {
-      const name = baseNames[ i ]
+      const name = baseNames[i]
       const settings = baseActions[name]
       panelSettings[name] = () => {
         const currentSettings = baseActions[currentBaseAction]

@@ -7,6 +7,7 @@ const webgl = [
   "animation_skinning_morph",
   "animation_multiple",
   // "camera" // incomplete with bugs
+  // "camera_array" // incomlete, arrayCamera is not working
 ]
 let current = webgl[webgl.length-1]
 

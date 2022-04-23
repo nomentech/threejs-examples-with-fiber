@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { CameraHelper, MathUtils } from "three"
-import { Canvas, render, useFrame, useThree } from "@react-three/fiber"
+import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { OrthographicCamera, PerspectiveCamera, useHelper } from "@react-three/drei"
 
 const SCREEN_WIDTH = window.innerWidth
@@ -42,7 +42,7 @@ const CameraHelpers = () => {
   useEffect(() => {
     activeCamera = cameraPerspective
     activeHelper = cameraPerspectiveHelper
-  }, [cameraPerspectiveHelper])
+  }, [])
 
   useFrame(() => {
     const r = Date.now() * 0.0005
