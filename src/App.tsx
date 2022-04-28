@@ -8,7 +8,9 @@ const webgl = [
   "animation_multiple",
   // "camera", // incomplete with bugs
   "camera_array",
-  // "camera_cinematic" // incomplete, camera not moving
+  // "camera_cinematic" // incomplete, objects not moving
+  // "camera_logarithmicdepthbuffer" // TODO
+  "clipping"
 ]
 let current = webgl[webgl.length-1]
 
