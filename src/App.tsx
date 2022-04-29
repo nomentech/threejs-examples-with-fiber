@@ -12,7 +12,8 @@ const webgl = [
   // "camera_logarithmicdepthbuffer" // TODO
   "clipping",
   "clipping_advanced",
-  "clipping_intersection"
+  "clipping_intersection",
+  "clipping_stencil" // incomplete with bugs
 ]
 let current = webgl[webgl.length-1]
 
