@@ -11,7 +11,8 @@ const webgl = [
   // "camera_cinematic" // incomplete, objects not moving
   // "camera_logarithmicdepthbuffer" // TODO
   "clipping",
-  "clipping_advanced"
+  "clipping_advanced",
+  "clipping_intersection"
 ]
 let current = webgl[webgl.length-1]
 
