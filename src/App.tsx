@@ -13,7 +13,8 @@ const webgl = [
   "clipping",
   "clipping_advanced",
   "clipping_intersection",
-  "clipping_stencil" // incomplete with bugs
+  // "clipping_stencil" // incomplete with bugs
+  // "decals" // incomplete
 ]
 let current = webgl[webgl.length-1]
 
