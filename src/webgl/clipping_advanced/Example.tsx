@@ -149,8 +149,8 @@ const createControls = () => {
   folder.add(props, 'Shadows')
   folder.add(props, 'Visualize').listen()
 
-  gui.addFolder('Global Clipping').
-    add({
+  gui.addFolder('Global Clipping')
+    .add({
       get 'Enabled'() {
         return renderer.clippingPlanes !== Empty as any
       },
@@ -169,11 +169,15 @@ const Light = () => {
         penumbra={0.2} position={[2, 3, 3]} castShadow 
         shadow-camera-near={3} shadow-camera-far={10}
         shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
-      <directionalLight color={0xffffff} intensity={0.5} position={[0, 2, 0]}castShadow 
-        shadow-camera-near={1} shadow-camera-far={10} 
-        shadow-camera-right={1} shadow-camera-left={-1}
-        shadow-camera-top={1} shadow-camera-bottom={-1}
-        shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
+      <directionalLight color={0xffffff} intensity={0.5} position={[0, 2, 0]} castShadow 
+        shadow-mapSize={[1024, 1024]}
+        // shadow-camera-near={1} shadow-camera-far={10} 
+        // shadow-camera-right={1} shadow-camera-left={-1}
+        // shadow-camera-top={1} shadow-camera-bottom={-1}
+        // shadow-mapSize-width={1024} shadow-mapSize-height={1024} 
+      >
+        <orthographicCamera attach='shadow-camera' args={[-1, 1, 1, -1, 1, 10]} />
+      </directionalLight>
     </>
   )
 }

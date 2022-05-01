@@ -15,6 +15,8 @@ const webgl = [
   "clipping_intersection",
   // "clipping_stencil" // incomplete with bugs
   // "decals" // incomplete
+  // "depth_texture" // TODO
+  "effects_anaglyph" // effect not working
 ]
 let current = webgl[webgl.length-1]
 
