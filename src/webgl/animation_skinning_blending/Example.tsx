@@ -2,7 +2,9 @@ import { useEffect } from "react"
 import { AnimationAction, AnimationMixer, Group, SkeletonHelper } from "three"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { useGLTF } from "@react-three/drei"
-import { GUI } from "three/examples/jsm/libs/lil-gui.module.min"
+import { button, useControls } from 'leva'
+
+import soldier from '../../models/Soldier.glb'
 
 let model: Group, skeleton: SkeletonHelper, mixer: AnimationMixer
 const crossFadeControls: any[] = []
@@ -14,8 +16,7 @@ let actions: Array<AnimationAction>
 let singleStepMode = false;
 let sizeOfNextStep = 0;
 
-const modelPath = `${process.env.PUBLIC_URL}/models/Soldier.glb`
-useGLTF.preload(modelPath)
+useGLTF.preload(soldier)
 
 // This function is needed, since animationAction.crossFadeTo() disables its start action and sets
 // the start action's timeScale to ((start animation's duration) / (end animation's duration))
@@ -79,11 +80,11 @@ const modifyTimeScale = (speed: number) => {
   mixer.timeScale = speed
 }
 
-const toSingleStepMode = () => {
+const toSingleStepMode = (size: number) => {
   unPauseAllActions()
 
   singleStepMode = true
-  sizeOfNextStep = settings["modify step size"]
+  sizeOfNextStep = size
 }
 
 const prepareCrossFade = (startAction: AnimationAction, endAction: AnimationAction, defaultDuration: number) => {
@@ -166,7 +167,7 @@ const updateCrossFadeControls = () => {
 
 const settings = {
   "show model": true,
-  "show skeleton": true,
+  "show skeleton": false,
   "deactivate all": deactivateAllActions,
   "activate all": activateAllActions,
   "pause/continue": pauseContinue,
@@ -193,7 +194,7 @@ const settings = {
 }
 
 const Model = () => {
-  const { scene, animations } = useGLTF(modelPath)
+  const { scene, animations }: any = useGLTF(soldier)
   // const clips = useAnimations(animations, scene)
 
   model = scene
@@ -216,7 +217,7 @@ const Model = () => {
     updateWeightSliders()
 
     // Enable/disable crossfade controls according to current weight values
-    updateCrossFadeControls()
+    // updateCrossFadeControls()
 
     // Get the time elapsed since the last frame, used for mixer update (if not in single step mode)
     let mixerUpdateDelta = delta
@@ -238,7 +239,6 @@ const Model = () => {
     <>
       <primitive object={scene} />
       <primitive object={skeleton} />
-      <Controls />
     </>
   )
 }
@@ -253,47 +253,65 @@ const Ground = () => {
 }
 
 const Controls = () => {
-  const panel = new GUI({ width: 310 })
+  useControls('Visibility', {
+    "show model": {
+      value: settings['show model'],
+      onChange: showModel
+    },
+    "show skeleton": {
+      value: settings['show skeleton'],
+      onChange: showSkeleton
+    }
+  })
 
-  useEffect(() => {
-    const folder1 = panel.addFolder("Visibility")
-    const folder2 = panel.addFolder("Activation/Deactivation")
-    const folder3 = panel.addFolder("Pausing/Stepping")
-    const folder4 = panel.addFolder("Crossfading")
-    const folder5 = panel.addFolder("Blend Weights")
-    const folder6 = panel.addFolder("General Speed")
+  useControls('Activation/Deactivation', {
+    "deactivate all": button(settings['deactivate all']),
+    "activate all": button(settings['activate all'])
+  })
 
-    folder1.add(settings, "show model" ).onChange(showModel)
-    folder1.add(settings, "show skeleton" ).onChange(showSkeleton)
-    folder2.add(settings, "deactivate all")
-    folder2.add(settings, "activate all")
-    folder3.add(settings, "pause/continue")
-    folder3.add(settings, "make single step")
-    folder3.add(settings, "modify step size", 0.01, 0.1, 0.001)
-    crossFadeControls.push(folder4.add(settings, "from walk to idle"))
-    crossFadeControls.push(folder4.add(settings, "from idle to walk"))
-    crossFadeControls.push(folder4.add(settings, "from walk to run"))
-    crossFadeControls.push(folder4.add(settings, "from run to walk"))
-    folder4.add(settings, "use default duration")
-    folder4.add(settings, "set custom duration", 0, 10, 0.01)
-    folder5.add(settings, "modify idle weight", 0.0, 1.0, 0.01).listen().onChange((weight: number) => {
-      setWeight(idleAction, weight)
-    })
-    folder5.add(settings, "modify walk weight", 0.0, 1.0, 0.01).listen().onChange((weight: number) => {
-      setWeight(walkAction, weight)
-    })
-    folder5.add(settings, "modify run weight", 0.0, 1.0, 0.01).listen().onChange((weight: number) => {
-      setWeight(runAction, weight)
-    })
-    folder6.add(settings, "modify time scale", 0.0, 1.5, 0.01).onChange( modifyTimeScale )
+  // https://github.com/pmndrs/leva/issues/288
+  useControls(/*'Pausing/Stepping',*/ {
+    "pause/continue": button(settings['pause/continue']),
+    "make single step": button((get) => settings['make single step'](get('modify step size'))),
+    "modify step size": { value: settings['modify step size'], max: 0.1, min: 0.01, step: 0.001 },
+  })
 
-    folder1.open()
-    folder2.open()
-    folder3.open()
-    folder4.open()
-    folder5.open()
-    folder6.open()
-  }, [])
+  useControls('Crossfading', {
+    "from walk to idle": button(settings['from walk to idle']),
+    "from idle to walk": button(settings['from idle to walk']),
+    "from walk to run": button(settings['from walk to run']),
+    "from run to walk": button(settings['from run to walk']),
+    "use default duration": settings['use default duration'],
+    "set custom duration": { value: settings['set custom duration'], max: 10, min: 0, step: 0.01 },
+  })
+
+  useControls('Blend Weights', {
+    "modify idle weight": {
+      value: settings['modify idle weight'], max: 1.0, min: 0.0, step: 0.01,
+      onChange: (weight: number) => {
+        setWeight(idleAction, weight)
+      }
+    },
+    "modify walk weight": {
+      value: settings['modify walk weight'], max: 1.0, min: 0.0, step: 0.01,
+      onChange: (weight: number) => {
+        setWeight(walkAction, weight)
+      }
+    },
+    "modify run weight": {
+      value: settings['modify run weight'], max: 1.0, min: 0.0, step: 0.01,
+      onChange: (weight: number) => {
+        setWeight(runAction, weight)
+      }
+    }
+  })
+
+  useControls('General Speed', {
+    "modify time scale": {
+      value: settings['modify time scale'], max: 1.5, min: 0.0, step: 0.01,
+      onChange: modifyTimeScale
+    }
+  })
 
   return null
 }
@@ -310,11 +328,14 @@ const Example = () => {
       <fog attach="fog" color={0xa0a0a0} near={10} far={50} />
       <hemisphereLight color={0xffffff} groundColor={0x444444} position={[0, 20, 0]} />
       <directionalLight color={0xffffff} position={[-3, 10, -10]} castShadow
-        shadow-camera-left={-2} shadow-camera-right={2} shadow-camera-top={2} shadow-camera-bottom={-2}
-        shadow-camera-near={0.1} shadow-camera-far={40}
-      />
+        // shadow-camera-left={-2} shadow-camera-right={2} shadow-camera-top={2} shadow-camera-bottom={-2}
+        // shadow-camera-near={0.1} shadow-camera-far={40}
+      >
+        <orthographicCamera attach='shadow-camera' args={[-2, 2, 2, -2, 0.1, 40]} />
+      </directionalLight>
       <Ground />
       <Model />
+      <Controls />
     </Canvas>
   )
 }
