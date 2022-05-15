@@ -270,9 +270,9 @@ const Controls = () => {
   })
 
   // https://github.com/pmndrs/leva/issues/288
-  useControls(/*'Pausing/Stepping',*/ {
+  useControls('Pausing/Stepping', {
     "pause/continue": button(settings['pause/continue']),
-    "make single step": button((get) => settings['make single step'](get('modify step size'))),
+    "make single step": button((get) => settings['make single step'](get('Pausing/Stepping.modify step size'))),
     "modify step size": { value: settings['modify step size'], max: 0.1, min: 0.01, step: 0.001 },
   })
 
