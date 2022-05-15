@@ -1,19 +1,17 @@
-import { useEffect, useRef } from "react"
+import { useRef } from "react"
 import { CameraHelper, MathUtils } from "three"
-import { Canvas, useFrame, useThree } from "@react-three/fiber"
-import { OrthographicCamera, PerspectiveCamera, useHelper } from "@react-three/drei"
+import { Canvas, useFrame } from "@react-three/fiber"
+import { useHelper } from "@react-three/drei"
 
-const SCREEN_WIDTH = window.innerWidth > 640 ? window.innerWidth - 300 : window.innerWidth
-const SCREEN_HEIGHT = window.innerWidth > 640 ? window.innerHeight : window.innerHeight - 48
-const aspect = SCREEN_WIDTH / SCREEN_HEIGHT
+import { aspect_ratio, canvas_height, canvas_width } from '../../contants'
+
 const frustumSize = 600
-
-let mesh: any, renderer: any, camera: any
+let mesh: any, camera: any
 let cameraPerspective: any, cameraOrtho: any
 let cameraPerspectiveHelper: any, cameraOrthoHelper: any
-let activeCamera: any, activeHelper: any
+let activeCamera: any, activeHelper: any, cameraRig: any
 
-const onKeydown = (event: any) => {
+const onKeyDown = (event: any) => {
   switch (event.key) {
     case "o":
     case "O":
@@ -28,100 +26,14 @@ const onKeydown = (event: any) => {
       break
   }
 }
-
-const CameraHelpers = () => {
-  const { gl, scene } = useThree()
-  renderer = gl
-  renderer.autoClear = false
-
-  cameraPerspective = useRef()
-  cameraOrtho = useRef()
-  cameraPerspectiveHelper = useHelper(cameraPerspective, CameraHelper)
-  cameraOrthoHelper = useHelper(cameraOrtho, CameraHelper)
-
-  useEffect(() => {
-    activeCamera = cameraPerspective
-    activeHelper = cameraPerspectiveHelper
-
-    window.addEventListener("keydown", onKeydown)
-    return () => window.removeEventListener("keydown", onKeydown)
-  }, [])
-
-  useFrame(() => {
-    const r = Date.now() * 0.0005
-
-    if (mesh) {
-      mesh.current.position.set(700*Math.cos(r), 700*Math.sin(r), 700*Math.sin(r))
-      mesh.current.children[0].position.set(70*Math.cos(2*r), 0, 70*Math.sin(r))
-    }
-
-    if (activeCamera === cameraPerspective && mesh.current.position.length() !== 0) {
-      cameraPerspective.fov = 35 + 30 * Math.sin(0.5*r)
-      cameraPerspective.far = mesh.current.position.length()
-
-      if (cameraPerspectiveHelper && cameraOrthoHelper) {
-        cameraPerspectiveHelper.current.update()
-        cameraPerspectiveHelper.visible = true
-  
-        cameraOrthoHelper.visible = false
-      }
-
-    } else {
-      cameraOrtho.far = mesh.current.position.length()
-
-      if (cameraPerspectiveHelper.current && cameraOrthoHelper.current) {
-        cameraOrthoHelper.current.update()
-        cameraOrthoHelper.visible = true
-  
-        cameraPerspectiveHelper.visible = false
-      }
-    }
-
-    if (cameraOrtho.current && cameraPerspective.current) {
-      cameraOrtho.current.lookAt(mesh.current.position)
-      cameraPerspective.current.lookAt(mesh.current.position)
-    }
-
-    if (renderer && activeHelper) {
-      renderer.clear();    
-
-      activeHelper.visible = false 
-      renderer.setViewport(0, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT)
-      renderer.render(scene, activeCamera.current)
-
-      activeHelper.visible = true
-      renderer.setViewport(SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT)
-      renderer.render(scene, camera.current)
-    }
-  })
-
-  return (
-    <group>    
-      <PerspectiveCamera 
-        fov={50} aspect={0.5*aspect} near={150} far={1000}
-        rotation={[0, Math.PI, 0]}
-        ref={cameraPerspective} 
-      />
-      <OrthographicCamera 
-        left={-0.5*frustumSize*aspect/2} right={0.5*frustumSize*aspect/2} top={frustumSize/2} bottom={-frustumSize/2}
-        near={150} far={1000}
-        rotation={[0, Math.PI, 0]}
-        ref={cameraOrtho}
-      /> 
-      <mesh position={[0, 0, 150]}>
-        <sphereGeometry args={[5, 16, 8]} />
-        <meshBasicMaterial color={0x0000ff} wireframe={true} />
-      </mesh>
-    </group>
-  )
-}
+document.addEventListener( 'keydown', onKeyDown )
 
 const Camera = () => {
   camera = useRef()
 
   return (
-    <PerspectiveCamera makeDefault ref={camera}
-      position={[0, 0, 2500]} fov={50} aspect={0.5*aspect} near={1} far={10000}
+    <perspectiveCamera ref={camera}
+      position={[0, 0, 2500]} fov={50} aspect={0.5*aspect_ratio} near={1} far={10000}
     />
   )
 }
@@ -134,9 +46,9 @@ const Particles = () => {
     vertices.push(MathUtils.randFloatSpread(2000)) // z
   }
   return (
-    <points >
+    <points>
       <bufferGeometry attach="geometry">
-        <bufferAttribute name="position" array={vertices} itemSize={3} />
+        <bufferAttribute attach="attributes-position" args={[new Float32Array(vertices), 3]} />
       </bufferGeometry>   
       <pointsMaterial color={0x888888} />
     </points>
@@ -158,14 +70,86 @@ const Mesh = () => {
   )
 }
 
+const CameraRig = () => {
+  cameraRig = useRef()
+  cameraPerspective = useRef()
+  cameraOrtho = useRef()
+  activeCamera = cameraPerspective
+
+  return (
+    <group ref={cameraRig}>
+      <perspectiveCamera ref={cameraPerspective} rotation={[0, Math.PI, 0]} args={[50, 0.5*aspect_ratio, 150, 1000]} />
+      <orthographicCamera ref={cameraOrtho} rotation={[0, Math.PI, 0]} 
+        args={[-0.5*frustumSize*aspect_ratio/2, 0.5*frustumSize*aspect_ratio/2, frustumSize/2, -frustumSize/2, 150, 1000]} />
+      <mesh>
+        <sphereGeometry args={[5, 16, 8]} />
+        <meshBasicMaterial color='#0000ff' wireframe />
+      </mesh>
+    </group>
+  )
+}
+
+const CameraHelpers = () => {
+  cameraPerspectiveHelper = useHelper(cameraPerspective, CameraHelper)
+  cameraOrthoHelper = useHelper(cameraOrtho, CameraHelper)
+  activeHelper = cameraPerspectiveHelper
+
+  return null
+}
+
+const Animation = () => {
+  return useFrame(({ gl, scene, set }) => {
+    const r = Date.now() * 0.0005
+
+    mesh.current.position.set(700*Math.cos(r), 700*Math.sin(r), 700*Math.sin(r))
+    mesh.current.children[0].position.set(70*Math.cos(2*r), 0, 70*Math.sin(r))
+
+    if (activeCamera === cameraPerspective) {
+      cameraPerspective.current.fov = 35 + 30 * Math.sin(0.5*r)
+      cameraPerspective.current.far = mesh.current.position.length()
+      cameraPerspective.current.updateProjectionMatrix()
+
+      cameraPerspectiveHelper.current.update()
+      cameraPerspectiveHelper.current.visible = true
+
+      cameraOrthoHelper.current.visible = false
+
+    } else {
+      cameraOrtho.current.far = mesh.current.position.length()
+      cameraOrtho.current.updateProjectionMatrix()
+
+      cameraOrthoHelper.current.update()
+      cameraOrthoHelper.current.visible = true
+
+      cameraPerspectiveHelper.current.visible = false
+    }
+
+    cameraRig.current.lookAt(mesh.current.position)
+
+    gl.clear();    
+
+    activeHelper.current.visible = false 
+    gl.setViewport(0, 0, canvas_width / 2, canvas_height)
+    set({camera: activeCamera.current})
+    gl.render(scene, activeCamera.current)
+
+    activeHelper.current.visible = true
+    gl.setViewport(canvas_width / 2, 0, canvas_width / 2, canvas_height)
+    set({camera: camera.current})
+    gl.render(scene, camera.current)
+  })
+}
+
 const Example = () => {
   return (
-    <Canvas camera={{manual: true}} >
+    <Canvas gl={{ antialias: true, pixelRatio: aspect_ratio , autoClear: false}} camera={{manual: true}}>
       <color attach="background" args={["black"]} />
-      <Camera />
-      <CameraHelpers />
       <Mesh />
+      <Camera />
+      <CameraRig />
+      <CameraHelpers />
       <Particles />
+      <Animation />
     </Canvas>
   )
 }
