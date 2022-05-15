@@ -18,7 +18,7 @@ const webgl = [
   // "depth_texture" // TODO
   "effects_anaglyph" // effect not working
 ]
-let current = webgl[3] // webgl[webgl.length-1]
+let current = webgl[4] // webgl[webgl.length-1]
 
 const App = () => {
   const component = lazy(() => import(`./webgl/${current}/Example`))

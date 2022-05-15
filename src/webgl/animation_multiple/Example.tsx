@@ -1,16 +1,16 @@
 import { useEffect } from "react"
+import { AnimationMixer } from "three"
+import { SkeletonUtils } from 'three-stdlib'
 import { Canvas, useFrame } from "@react-three/fiber"
 import { useGLTF } from "@react-three/drei"
-import { AnimationMixer } from "three"
-import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils"
 
-const modelPath = `${process.env.PUBLIC_URL}/models/Soldier.glb`
-useGLTF.preload(modelPath)
+import soldier from '../../models/Soldier.glb'
+useGLTF.preload(soldier)
 
 const mixers: AnimationMixer[] = []
 
 const Model = () => {
-  const { scene, animations } = useGLTF(modelPath)
+  const { scene, animations }: any = useGLTF(soldier)
 
   const model1 = SkeletonUtils.clone(scene)
   const model2 = SkeletonUtils.clone(scene)
@@ -66,8 +66,11 @@ const Example = () => {
       <fog attach="fog" args={[0xa0a0a0, 10, 50]} />
       <hemisphereLight position={[0, 20, 0]} args={[0xffffff, 0x444444]} />
       <directionalLight position={[-3, 10, -10]} args={[0xffffff]} castShadow
-        shadow-camera-top={4} shadow-camera-bottom={-4} shadow-camera-left={-4} shadow-camera-right={4}
-        shadow-camera-near={0.1} shadow-camera-far={40} />
+        // shadow-camera-top={4} shadow-camera-bottom={-4} shadow-camera-left={-4} shadow-camera-right={4}
+        // shadow-camera-near={0.1} shadow-camera-far={40} 
+      >
+        <orthographicCamera attach='shadow-camera' args={[-4, 4, 4, -4, 0.1, 40]} />
+      </directionalLight>
       <Ground />
       <Model />
     </Canvas>
