@@ -1,16 +1,13 @@
 import { AnimationClip, AnimationMixer, Group, LoopOnce } from "three"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { useGLTF } from "@react-three/drei"
-import { GUI } from "three/examples/jsm/libs/lil-gui.module.min"
-import { useEffect } from "react"
+import { button, useControls } from 'leva'
 
-const modelPath = `${process.env.PUBLIC_URL}/models/RobotExpressive.glb`
-useGLTF.preload(modelPath)
+import robot from '../../models/RobotExpressive.glb'
+useGLTF.preload(robot)
 
-let gui, mixer: AnimationMixer, actions: any, activeAction: any, previousAction: any
-let model: Group, face: any
-
-const api = { state: "Walking" } as any
+let mixer: AnimationMixer, actions: any, activeAction: any, previousAction: any
+let model: Group, animations: AnimationClip[], face: any
 
 const fadeToAction = (name: string, duration: number) => {
   previousAction = activeAction
@@ -28,13 +25,9 @@ const fadeToAction = (name: string, duration: number) => {
     .play()
 }
 
-const createControl = (model: Group, animations: AnimationClip[]) => {
+const Controls = () => {
   const states = ["Idle", "Walking", "Running", "Dance", "Death", "Sitting", "Standing"]
   const emotes = ["Jump", "Yes", "No", "Wave", "Punch", "ThumbsUp"]
-
-  gui = new GUI()
-
-  mixer = new AnimationMixer(model)
 
   actions = {}
 
@@ -50,68 +43,70 @@ const createControl = (model: Group, animations: AnimationClip[]) => {
   }
 
   // states
-  const statesFolder = gui.addFolder("States")
-  const clipCtrl = statesFolder.add(api, "state").options(states)
-
-  clipCtrl.onChange(() => {
-    fadeToAction(api.state, 0.5)
+  useControls('States', {
+    'state': {
+      value: 'Walking',
+      options: states,
+      onChange: (value) => fadeToAction(value, 0.5)
+    }
   })
 
-  statesFolder.open()
 
   // emotes
-  const emoteFolder = gui.addFolder("Emotes")
-
+  const emotesObj: any = {}
   const createEmoteCallback = (name: string) => {
-    api[name] = () => {
+    emotesObj[name] = button((get) => {
       fadeToAction(name, 0.2)
-      mixer.addEventListener("finished", restoreState)
-    }
-
-    emoteFolder.add(api, name)
+      mixer.addEventListener("finished", () => restoreState(get('States.state')))
+    })
   }
 
-  const restoreState = () => {
-    mixer.removeEventListener("finished", restoreState)
-    fadeToAction(api.state, 0.2)
+  const restoreState = (state: string) => {
+    mixer.removeEventListener("finished", () => restoreState(state))
+    fadeToAction(state, 0.2)
   }
 
   for (let i = 0; i < emotes.length; i++) {
     createEmoteCallback(emotes[i])
   }
 
-  emoteFolder.open()
+  useControls('Emotes', emotesObj)
 
   // expressions
   face = model.getObjectByName("Head_4")
 
   const expressions = Object.keys(face.morphTargetDictionary)
-  const expressionFolder = gui.addFolder("Expressions")
-
+  const expressionsObj: any = {}
   for (let i = 0; i < expressions.length; i++) {
-    expressionFolder.add(face.morphTargetInfluences, i, 0, 1, 0.01).name(expressions[i])
+    expressionsObj[expressions[i]] = {
+      value: face.morphTargetInfluences[i],
+      min: 0,
+      max: 1,
+      step: 0.01,
+      onChange: (value: number) => face.morphTargetInfluences[i] = value
+    }
   }
+
+  useControls('Expressions', expressionsObj)
 
   activeAction = actions["Walking"]
   activeAction.play()
 
-  expressionFolder.open()
+  return null
 }
 
 const Model = () => {
-  const { scene, animations } = useGLTF(modelPath)
-  model = scene
+  const gltf: any = useGLTF(robot)
+  model = gltf.scene
+  mixer = new AnimationMixer(model)
+  animations = gltf.animations
 
   useFrame((_, delta) => {
     if (mixer) mixer.update(delta)
   })
 
-  useEffect(() => {
-    createControl(model, animations)
-  }, [])
-
   return (
-    <primitive object={scene} />
+    <primitive object={model} />
  )
 }
 
@@ -143,6 +138,7 @@ const Example = () => {
       <directionalLight color={0xffffff} position={[0, 20, 10]} />
       <Ground />
       <Model />
+      <Controls />
     </Canvas>
  )
 }
