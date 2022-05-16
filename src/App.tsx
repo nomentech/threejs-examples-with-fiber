@@ -8,7 +8,7 @@ const webgl = [
   "animation_multiple",
   // "camera", // incomplete with bugs
   "camera_array",
-  "camera_cinematic", // incomplete, objects not moving
+  "camera_cinematic", // incomplete, no controls
   // "camera_logarithmicdepthbuffer" // TODO
   "clipping",
   "clipping_advanced",
@@ -18,7 +18,7 @@ const webgl = [
   // "depth_texture" // TODO
   "effects_anaglyph" // effect not working
 ]
-let current = webgl[6] // webgl[webgl.length-1]
+let current = webgl[7] // webgl[webgl.length-1]
 
 const App = () => {
   const component = lazy(() => import(`./webgl/${current}/Example`))
