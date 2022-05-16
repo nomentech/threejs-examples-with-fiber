@@ -1,18 +1,16 @@
-import { useEffect, useRef } from 'react'
-import { Color, DoubleSide, Matrix4, MeshPhongMaterial, Plane, Vector3, WebGLRenderer } from 'three'
-import { GUI } from "three/examples/jsm/libs/lil-gui.module.min"
+import { useRef } from 'react'
+import * as THREE from 'three'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
+import { useControls } from 'leva'
 
 import { aspect_ratio } from '../../contants'
 
-let renderer: WebGLRenderer
-let clipMaterial: MeshPhongMaterial
+let clipMaterial: THREE.MeshPhongMaterial
 let globalClippingPlanes: any[]
-let startTime: number
-let volumeVisualization: any
+let volumeVisualization: THREE.Group
 
-const planesFromMesh = (vertices: Vector3[], indices: number[]) => {
+const planesFromMesh = (vertices: THREE.Vector3[], indices: number[]) => {
   // creates a clipping volume from a convex triangular mesh
   // specified by the arrays 'vertices' and 'indices'
 
@@ -24,7 +22,7 @@ const planesFromMesh = (vertices: Vector3[], indices: number[]) => {
     const b = vertices[indices[j+1]]
     const c = vertices[indices[j+2]]
 
-    result[i] = new Plane().setFromCoplanarPoints(a, b, c)
+    result[i] = new THREE.Plane().setFromCoplanarPoints(a, b, c)
   }
 
   return result
@@ -34,14 +32,14 @@ const planeToMatrix = (function () {
   // creates a matrix that aligns X/Y to a given plane
 
   // temporaries:
-  const xAxis = new Vector3()
-  const yAxis = new Vector3()
-  const trans = new Vector3()
+  const xAxis = new THREE.Vector3()
+  const yAxis = new THREE.Vector3()
+  const trans = new THREE.Vector3()
 
   return function planeToMatrix(plane: any) {
 
     const zAxis = plane.normal
-    const matrix = new Matrix4()
+    const matrix = new THREE.Matrix4()
 
     // Hughes & Moeller '99
     // "Building an Orthonormal Basis from a Unit Vector."
@@ -68,12 +66,12 @@ const createPlanes = (n: number) => {
   const result = new Array(n)
 
   for (let i = 0; i !== n; ++i)
-    result[i] = new Plane()
+    result[i] = new THREE.Plane()
 
   return result
 }
 
-const assignTransformedPlanes = (planesOut: any[], planesIn: any[], matrix: Matrix4) => {
+const assignTransformedPlanes = (planesOut: any[], planesIn: any[], matrix: THREE.Matrix4) => {
   // sets an array of existing planes to transformed 'planesIn'
   for (let i = 0, n = planesIn.length; i !== n; ++ i)
     planesOut[i].copy(planesIn[i]).applyMatrix4(matrix)
@@ -95,7 +93,7 @@ const cylindricalPlanes = (n: number, innerRadius: number) => {
   return result
 }
 
-const setObjectWorldMatrix = (object: any, matrix: Matrix4) => {  
+const setObjectWorldMatrix = (object: any, matrix: THREE.Matrix4) => {  
   // set the orientation of an object based on a world matrix
   const parent = object.parent
   // scene.updateMatrixWorld()
@@ -104,10 +102,10 @@ const setObjectWorldMatrix = (object: any, matrix: Matrix4) => {
 }
 
 const Vertices = [
-  new Vector3(1, 0, Math.SQRT1_2),
-  new Vector3(-1, 0, Math.SQRT1_2),
-  new Vector3(0, 1, -Math.SQRT1_2),
-  new Vector3(0, -1, -Math.SQRT1_2)
+  new THREE.Vector3(1, 0, Math.SQRT1_2),
+  new THREE.Vector3(-1, 0, Math.SQRT1_2),
+  new THREE.Vector3(0, 1, -Math.SQRT1_2),
+  new THREE.Vector3(0, -1, -Math.SQRT1_2)
 ]
 const Indices = [0, 1, 2,   0, 2, 3,  0, 3, 1,   1, 3, 2]
 const Planes = planesFromMesh(Vertices, Indices)
@@ -115,50 +113,48 @@ const PlaneMatrices = Planes.map(planeToMatrix)
 const GlobalClippingPlanes = cylindricalPlanes(5, 2.5)
 const Empty = Object.freeze([])
 
-const transform = new Matrix4()
-const tmpMatrix = new Matrix4()
+const transform = new THREE.Matrix4()
+const tmpMatrix = new THREE.Matrix4()
 
-const createControls = () => {
-  const gui = new GUI()
+const Controls = () => {
+  const { gl } = useThree()
 
-  const folder = gui.addFolder('Local Clipping')
-  const props = {
-    get 'Enabled'() {
-      return renderer.localClippingEnabled
+  // Clipping setup
+  globalClippingPlanes = createPlanes(GlobalClippingPlanes.length)
+  gl.clippingPlanes = Empty as any
+  gl.localClippingEnabled = true
+
+  useControls('Local Clipping', {
+    'Enabled': {
+      value: gl.localClippingEnabled,
+      onChange: (v: boolean) => {
+        gl.localClippingEnabled = v
+        if (!v) volumeVisualization.visible = false
+      }
     },
-    set 'Enabled'(v) {
-      renderer.localClippingEnabled = v
-      if (!v) volumeVisualization.current.visible = false
+    'Shadow': {
+      value: clipMaterial.clipShadows,
+      onChange: (v: boolean) => clipMaterial.clipShadows = v
     },
-    get 'Shadows'() {
-      return clipMaterial.clipShadows
-    },
-    set 'Shadows'(v) {
-      clipMaterial.clipShadows = v
-    },
-    get 'Visualize'() {
-      return volumeVisualization.current.visible
-    },
-    set 'Visualize'(v) {
-      if (renderer.localClippingEnabled)
-        volumeVisualization.current.visible = v
+    'Visualize': {
+      value: volumeVisualization.visible,
+      onChange: (v: boolean) => {
+        if (gl.localClippingEnabled) volumeVisualization.visible = v
+      }
     }
-  }
+  })
 
-  folder.add(props, 'Enabled')
-  folder.add(props, 'Shadows')
-  folder.add(props, 'Visualize').listen()
-
-  gui.addFolder('Global Clipping')
-    .add({
-      get 'Enabled'() {
-        return renderer.clippingPlanes !== Empty as any
-      },
-      set 'Enabled'(v) {
-        renderer.clippingPlanes = v ?
+  useControls('Global Clipping', {
+    'Enabled': {
+      value: gl.clippingPlanes !== Empty as any,
+      onChange: (v: boolean) => {
+        gl.clippingPlanes = v ?
           globalClippingPlanes : Empty as any
       }
-    }, 'Enabled')
+    }
+  })
+
+  return null
 }
 
 const Light = () => {
@@ -182,28 +178,19 @@ const Light = () => {
   )
 }
 
-const Mesh = () => {
-  const { gl } = useThree()
-  renderer = gl
-
-  // Clipping setup
-  globalClippingPlanes = createPlanes(GlobalClippingPlanes.length)
-  gl.clippingPlanes = Empty as any
-  gl.localClippingEnabled = true
-
-  clipMaterial = new MeshPhongMaterial({
+const Meshes = () => {
+  clipMaterial = new THREE.MeshPhongMaterial({
     color: 0xee0a10,
     shininess: 100,
-    side: DoubleSide,
+    side: THREE.DoubleSide,
     // Clipping setup
     clippingPlanes: createPlanes(Planes.length),
     clipShadows: true
   })
 
   const meshRef: any = useRef()
-  useFrame(() => {
-    const currentTime = Date.now()
-    const time = (currentTime - startTime) / 1000
+  useFrame(({ clock }) => {
+    const time = clock.getElapsedTime()
 
     meshRef.current.position.y = 1
     meshRef.current.rotation.x = time * 0.5
@@ -215,7 +202,7 @@ const Mesh = () => {
     transform.multiply(tmpMatrix.makeScale(bouncy, bouncy, bouncy))
 
     assignTransformedPlanes(clipMaterial.clippingPlanes, Planes, transform)
-    const planeMeshes = volumeVisualization.current.children
+    const planeMeshes = volumeVisualization.children
 
     for (let i = 0, n = planeMeshes.length; i !== n; ++ i) {
       tmpMatrix.multiplyMatrices(transform, PlaneMatrices[i])
@@ -241,39 +228,43 @@ const Mesh = () => {
       <group ref={meshRef}>
         {meshes}
       </group>
-      <VolumeVisualization />
     </>
   )
 }
 
 const VolumeVisualization = () => {
-  const meshes = []
-  const color = new Color()
+  volumeVisualization = new THREE.Group()
+  volumeVisualization.visible = false
+  const planeGeometry = new THREE.PlaneGeometry( 3, 3, 1, 1 )
+
+  const color = new THREE.Color()
   for (let i = 0, n = Planes.length; i !== n; ++ i) {
-    meshes.push(
-      <mesh key={Math.random()} matrixAutoUpdate={false} >
-        <planeGeometry args={[3, 3, 1, 1]} />
-        <meshBasicMaterial color={color.setHSL(i/n, 0.5, 0.5).getHex()} 
-          side={DoubleSide} opacity={0.2} transparent={true} 
-          clippingPlanes={clipMaterial.clippingPlanes.filter((_: number, j: number) => j !== i)}
-        />
-      </mesh>
-    )
+    const material = new THREE.MeshBasicMaterial( {
+      color: color.setHSL(i / n, 0.5, 0.5).getHex(),
+      side: THREE.DoubleSide,
+
+      opacity: 0.2,
+      transparent: true,
+
+      // clip to the others to show the volume (wildly
+      // intersecting transparent planes look bad)
+      clippingPlanes: clipMaterial.clippingPlanes.
+        filter((_: any, j: number) => {
+          return j !== i
+        })
+
+      // no need to enable shadow clipping - the plane
+      // visualization does not cast shadows
+    })
+
+    const mesh = new THREE.Mesh(planeGeometry, material)
+    mesh.matrixAutoUpdate = false
+
+    volumeVisualization.add(mesh)
   }
 
-  volumeVisualization = useRef()
-
-  useEffect(() => {
-    volumeVisualization.current.visible = false
-    createControls()
-  }, [])
-
   return (
-    <>    
-      <group ref={volumeVisualization}>
-        {meshes}
-      </group>
-    </>
+    <primitive object={volumeVisualization} />    
   )
 }
 
@@ -287,16 +278,14 @@ const Ground = () => {
 }
 
 const Example = () => {
-  useEffect(() => {
-    startTime = Date.now()
-  }, [])
-
   return (
     <Canvas camera={{position: [0, 1.5, 3], fov: 36, aspect: aspect_ratio, near: 0.25, far: 16}} shadows>
       <color attach='background' args={['black']} />
       <Light />
-      <Mesh />
+      <Meshes />
       <Ground />
+      <VolumeVisualization />
+      <Controls />
       <OrbitControls target={[0, 1, 0]} minDistance={1} maxDistance={8} />
     </Canvas>
   )
