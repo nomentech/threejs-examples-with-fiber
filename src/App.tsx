@@ -16,9 +16,10 @@ const webgl = [
   // "clipping_stencil", // incomplete with bugs
   // "decals", // incomplete
   // "depth_texture" // TODO
-  "effects_anaglyph" // effect not working
+  "effects_anaglyph", // effect not working
+  "effects_ascii"
 ]
-let current = webgl[10] // webgl[webgl.length-1]
+let current = webgl[webgl.length-1]
 
 const App = () => {
   const component = lazy(() => import(`./webgl/${current}/Example`))
