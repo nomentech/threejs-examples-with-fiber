@@ -1,4 +1,4 @@
-import { createRef, useMemo } from 'react'
+import { createRef, useEffect, useMemo } from 'react'
 import { CubeTextureLoader, PerspectiveCamera } from 'three'
 import { AnaglyphEffect } from 'three-stdlib'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
@@ -24,10 +24,28 @@ const onDocumentMouseMove = (event: any) => {
 }
 document.addEventListener('mousemove', onDocumentMouseMove)
 
+const Effect = () => {
+  const { gl, scene, size, camera } = useThree()
+
+  const effect = useMemo(() => {
+    const effect = new AnaglyphEffect(gl)
+
+    return effect
+  }, [])
+
+  useEffect(() => {
+    effect.setSize(size.width || 2, size.height || 2)
+  }, [size])
+
+  useFrame(() => {
+    effect.render(scene, camera)
+  }, 1)
+
+  return null
+}
+
 const Meshes = () => { 
-  const { gl, scene, camera } = useThree()
-  const effect = new AnaglyphEffect(gl)
-  effect.setSize(canvas_width || 2, canvas_height || 2)
+  const { scene, camera } = useThree()
   
   const spheres = useMemo(() => {
     const refs = []
@@ -61,7 +79,6 @@ const Meshes = () => {
       sphere.position.x = 5 * Math.cos(timer+i)
       sphere.position.y = 5 * Math.sin(timer+i*1.1)
     }
-    effect.render(scene, camera)
   })
   
   return (
@@ -81,6 +98,7 @@ const Example = () => {
       <primitive attach='camera' object={camera} makeDefault />
       <primitive attach='background' object={textureCube} />
       <Meshes />
+      <Effect />
     </Canvas>
   )
 }
