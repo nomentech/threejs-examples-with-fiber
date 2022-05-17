@@ -13,8 +13,8 @@ const webgl = [
   "clipping",
   "clipping_advanced",
   "clipping_intersection",
-  "clipping_stencil", // incomplete with bugs
-  // "decals" // incomplete
+  // "clipping_stencil", // incomplete with bugs
+  // "decals", // incomplete
   // "depth_texture" // TODO
   "effects_anaglyph" // effect not working
 ]
@@ -28,12 +28,6 @@ const App = () => {
 
   const clickHandler = (item: string) => {
     if (current !== item) {
-      // Remove controls
-      const element = document.querySelectorAll(".lil-gui")
-      if (element.length > 0) {
-        element.forEach(e => e.remove())
-      }
-
       const component = lazy(() => import(`./webgl/${item}/Example`))
       setExample(component)
 

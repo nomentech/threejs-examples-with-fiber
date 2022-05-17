@@ -1,7 +1,8 @@
 import { createRef, useMemo } from 'react'
 import { CubeTextureLoader, PerspectiveCamera } from 'three'
-import { AnaglyphEffect } from 'three/examples/jsm/effects/AnaglyphEffect.js'
+import { AnaglyphEffect } from 'three-stdlib'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
+
 import { aspect_ratio, canvas_width, canvas_height } from '../../contants'
 
 import px from '../../textures/cube/pisa/px.png'
@@ -47,8 +48,8 @@ const Meshes = () => {
     )
   }
 
-  useFrame(() => {
-    const timer = 0.0001 * Date.now()
+  useFrame(({ clock }) => {
+    const timer = clock.getElapsedTime() * 0.1
 
     camera.position.x += (mouseX - camera.position.x) * .05
 		camera.position.y += (-mouseY - camera.position.y) * .05
