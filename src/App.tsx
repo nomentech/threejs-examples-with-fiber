@@ -17,7 +17,9 @@ const webgl = [
   // "decals", // incomplete
   // "depth_texture" // TODO
   "effects_anaglyph",
-  "effects_ascii"
+  "effects_ascii",
+  // "effects_parallaxbarrier" // TODO, with effectComposer
+  "effects_peppersghost"
 ]
 let current = webgl[webgl.length-1]
 
