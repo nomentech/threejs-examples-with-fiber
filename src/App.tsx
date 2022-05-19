@@ -19,7 +19,8 @@ const webgl = [
   "effects_anaglyph",
   "effects_ascii",
   // "effects_parallaxbarrier" // TODO, with effectComposer
-  "effects_peppersghost"
+  "effects_peppersghost",
+  "effects_stereo", // texture is too bright
 ]
 let current = webgl[webgl.length-1]
 
