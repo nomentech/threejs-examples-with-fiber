@@ -24,7 +24,9 @@ const webgl = [
   // "framebuffer_texture", // TODO
   "geometries",
   // "geometries_parametric", // TODO
-  "geometry_colors" // with shadow issue
+  "geometry_colors", // with shadow issue
+  // "geometry_colors_lookuptable", // TODO
+  "geometry_convex"
 ]
 let current = webgl[webgl.length-1]
 
