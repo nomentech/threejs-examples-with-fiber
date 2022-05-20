@@ -23,6 +23,8 @@ const webgl = [
   "effects_stereo", // texture is too bright
   // "framebuffer_texture", // TODO
   "geometries",
+  // "geometries_parametric", // TODO
+  "geometry_colors" // with shadow issue
 ]
 let current = webgl[webgl.length-1]
 
