@@ -26,7 +26,8 @@ const webgl = [
   // "geometries_parametric", // TODO
   "geometry_colors", // with shadow issue
   // "geometry_colors_lookuptable", // TODO
-  "geometry_convex"
+  "geometry_convex",
+  "geometry_cube"
 ]
 let current = webgl[webgl.length-1]
 
