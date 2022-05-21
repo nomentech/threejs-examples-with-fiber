@@ -29,7 +29,9 @@ const webgl = [
   "geometry_convex",
   "geometry_cube",
   // "geometry_dynamic" // incomplete
-  "geometry_extrude_shapes"
+  "geometry_extrude_shapes",
+  // "geometry_extrude_shapes2" // TODO
+  "geometry_extrude_splines"
 ]
 let current = webgl[webgl.length-1]
 
