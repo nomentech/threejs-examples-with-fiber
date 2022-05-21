@@ -29,6 +29,7 @@ const webgl = [
   "geometry_convex",
   "geometry_cube",
   // "geometry_dynamic" // incomplete
+  "geometry_extrude_shapes"
 ]
 let current = webgl[webgl.length-1]
 
