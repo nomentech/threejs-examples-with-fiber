@@ -32,7 +32,9 @@ const webgl = [
   "geometry_extrude_shapes",
   // "geometry_extrude_shapes2" // TODO
   "geometry_extrude_splines",
-  "geometry_minecraft"
+  "geometry_minecraft",
+  // "geometry_nurbs" // TODO
+  "geometry_shapes" // California doesn't show, postion is bit off
 ]
 let current = webgl[webgl.length-1]
 
