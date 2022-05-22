@@ -31,7 +31,8 @@ const webgl = [
   // "geometry_dynamic" // incomplete
   "geometry_extrude_shapes",
   // "geometry_extrude_shapes2" // TODO
-  "geometry_extrude_splines"
+  "geometry_extrude_splines",
+  "geometry_minecraft"
 ]
 let current = webgl[webgl.length-1]
 
