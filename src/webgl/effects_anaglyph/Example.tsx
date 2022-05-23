@@ -3,7 +3,7 @@ import { CubeTextureLoader, PerspectiveCamera } from 'three'
 import { AnaglyphEffect } from 'three-stdlib'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 
-import { aspect_ratio, canvas_width, canvas_height } from '../../contants'
+import { aspect_ratio } from '../../contants'
 
 import px from '../../textures/cube/pisa/px.png'
 import py from '../../textures/cube/pisa/py.png'
@@ -12,17 +12,8 @@ import nx from '../../textures/cube/pisa/nx.png'
 import ny from '../../textures/cube/pisa/ny.png'
 import nz from '../../textures/cube/pisa/nz.png'
 
-let mouseX = 0
-let mouseY = 0
-
 const urls = [px, nx, py, ny, pz, nz]
 const textureCube = new CubeTextureLoader().load(urls)
-
-const onDocumentMouseMove = (event: any) => {
-  mouseX = (event.clientX - canvas_width / 2) / 100
-  mouseY = (event.clientY - canvas_height / 2) / 100
-}
-document.addEventListener('mousemove', onDocumentMouseMove)
 
 const Effect = () => {
   const { gl, scene, size, camera } = useThree()
@@ -66,11 +57,11 @@ const Meshes = () => {
     )
   }
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock, mouse }) => {
     const timer = clock.getElapsedTime() * 0.1
 
-    camera.position.x += (mouseX - camera.position.x) * .05
-		camera.position.y += (-mouseY - camera.position.y) * .05
+    camera.position.x += (mouse.x - camera.position.x) * .05
+		camera.position.y += (-mouse.y - camera.position.y) * .05
 
 		camera.lookAt(scene.position)
 

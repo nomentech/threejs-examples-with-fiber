@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { StereoEffect } from 'three-stdlib'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 
-import { aspect_ratio, canvas_height, canvas_width } from '../../contants'
+import { aspect_ratio } from '../../contants'
 
 import nx from '../../textures/cube/Park3Med/nx.jpg'
 import ny from '../../textures/cube/Park3Med/ny.jpg'
@@ -12,15 +12,9 @@ import px from '../../textures/cube/Park3Med/px.jpg'
 import py from '../../textures/cube/Park3Med/py.jpg'
 import pz from '../../textures/cube/Park3Med/pz.jpg'
 
-let mouseX = 0, mouseY = 0
 const urls = [px, nx, py, ny, pz, nz]
 const textureCube = new THREE.CubeTextureLoader().load(urls)
 textureCube.mapping = THREE.CubeRefractionMapping
-
-document.addEventListener('mousemove', (event) => {
-  mouseX = (event.clientX - canvas_width / 2) * 10
-  mouseY = (event.clientY - canvas_height / 2) * 10
-})
 
 const Effect = () => {
   const { gl, size } = useThree()
@@ -61,11 +55,11 @@ const Meshes = () => {
     return spheres
   }, [])
   
-  useFrame(({ scene, camera, clock }) => {
+  useFrame(({ scene, camera, clock, mouse }) => {
     const timer = clock.getElapsedTime() * 0.1
 
-    camera.position.x += (mouseX - camera.position.x) * 0.05
-    camera.position.y += (-mouseY - camera.position.y) * 0.05
+    camera.position.x += (mouse.x * 1000 - camera.position.x)
+    camera.position.y += (mouse.y * 1000 - camera.position.y)
     camera.lookAt(scene.position)
     
     spheres.map((sphere, i) => {

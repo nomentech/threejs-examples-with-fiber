@@ -2,13 +2,7 @@ import { useMemo } from 'react'
 import * as THREE from 'three'
 import { Canvas, useFrame } from '@react-three/fiber'
 
-import { aspect_ratio, canvas_height, canvas_width } from '../../contants'
-
-let mouseX = 0, mouseY = 0
-window.addEventListener('mousemove', (event) => {
-  mouseX = event.clientX - canvas_width / 2
-  mouseY = event.clientY - canvas_height / 2
-})
+import { aspect_ratio } from '../../contants'
 
 const Meshes = () => {
   const { geometry1, geometry2, geometry3, material, wireframeMaterial } = useMemo(() => {
@@ -102,9 +96,9 @@ const ShadowMeshes = () => {
 }
 
 const Animate = () => {
-  return useFrame(({ scene, camera }) => {
-    camera.position.x += (mouseX - camera.position.x) * 0.05
-    camera.position.y += (mouseY - camera.position.y) * 0.05
+  return useFrame(({ scene, camera, mouse }) => {
+    camera.position.x += (mouse.x * 100 - camera.position.x)
+    camera.position.y += (-mouse.y * 100 - camera.position.y)
 
     camera.lookAt(scene.position)
   })
